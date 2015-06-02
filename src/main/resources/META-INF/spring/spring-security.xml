@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p" xmlns:oxm="http://www.springframework.org/schema/oxm"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://www.springframework.org/schema/aop
+ http://www.springframework.org/schema/aop/spring-aop.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context.xsd
+ http://www.springframework.org/schema/tx
+ http://www.springframework.org/schema/tx/spring-tx.xsd
+ http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-1.5.xsd
+ http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+
+
+    <security:authentication-manager id="authenticationManager">
+        <security:authentication-provider user-service-ref="userService">
+            <security:password-encoder ref="saltedSHA256PasswordEncoder"></security:password-encoder>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+
+    <security:http
+            realm="Protected API"
+            use-expressions="true"
+            auto-config="false"
+            create-session="stateless"
+            entry-point-ref="unauthorizedEntryPoint"
+            authentication-manager-ref="authenticationManager">
+        <security:custom-filter ref="authenticationTokenProcessingFilter" position="FORM_LOGIN_FILTER" />
+        <security:intercept-url pattern="/services/user/auth" access="permitAll" />
+        <security:intercept-url pattern="/services/user/register" access="permitAll" />
+        <security:intercept-url method="GET" pattern="/services/**" access="hasAnyRole('ADMIN','USER')" />
+        <security:intercept-url method="PUT" pattern="/services/**" access="hasAnyRole('ADMIN')" />
+        <security:intercept-url method="POST" pattern="/services/**" access="hasAnyRole('ADMIN','USER')" />
+        <security:intercept-url method="DELETE" pattern="/services/**" access="hasAnyRole('ADMIN')" />
+    </security:http>
+
+</beans>
